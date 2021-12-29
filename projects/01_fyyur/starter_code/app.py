@@ -10,7 +10,7 @@ from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 import logging
 from logging import Formatter, FileHandler
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from forms import *
 from flask_migrate import Migrate
 
@@ -193,13 +193,30 @@ def create_venue_form():
 def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
+  if 'seeking_talent' in request.form:
+    seeking_talent = True
+  else:
+    seeking_talent = False
 
-  # on successful db insert, flash success
-  flash('Venue ' + request.form['name'] + ' was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-  # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-  return render_template('pages/home.html')
+  try:
+    venue = Venue(name=request.form.get('name'), city=request.form.get('city'),
+            state=request.form.get('state'), address=request.form.get('address'),
+            phone=request.form.get('phone'), genres=request.form.getlist('genres'),
+            facebook_link=request.form.get('facebook_link'), image_link=request.form.get('image_link'),
+            website_link=request.form.get('website_link'), seeking_talent=seeking_talent,
+            seeking_description=request.form.get('seeking_description'))
+    db.session.add(venue)
+    db.session.commit()
+    # on successful db insert, flash success
+    flash('Venue ' + request.form['name'] + ' was successfully listed!')
+    return redirect(url_for('index'))
+  except:
+    # TODO: on unsuccessful db insert, flash an error instead.
+    flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
+    return redirect(url_for('create_venue_form'))
+    # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
+    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+  
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
@@ -387,12 +404,28 @@ def create_artist_submission():
   # called upon submitting the new artist listing form
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
+  if 'seeking_venue' in request.form:
+    seeking_venue = True
+  else:
+    seeking_venue = False
 
+  try:
+    artist = Artist(name=request.form.get('name'), city=request.form.get('city'),
+            state=request.form.get('state'), phone=request.form.get('phone'), 
+            genres=request.form.getlist('genres'), facebook_link=request.form.get('facebook_link'), 
+            image_link=request.form.get('image_link'), website_link=request.form.get('website_link'), 
+            seeking_venue=seeking_venue, seeking_description=request.form.get('seeking_description'))
+
+    db.session.add(artist)
+    db.session.commit()
   # on successful db insert, flash success
-  flash('Artist ' + request.form['name'] + ' was successfully listed!')
+    flash('Artist ' + request.form['name'] + ' was successfully listed!')
+    return redirect(url_for('index'))
+  except:
   # TODO: on unsuccessful db insert, flash an error instead.
   # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
-  return render_template('pages/home.html')
+    flash('An error occurred. Artist ' + request.form['name'] + ' could not be listed.')
+    return redirect(url_for('create_artist_form'))
 
 
 #  Shows
@@ -450,13 +483,22 @@ def create_shows():
 def create_show_submission():
   # called to create new shows in the db, upon submitting new show listing form
   # TODO: insert form data as a new Show record in the db, instead
+  try:  
+    show = Show(venue_id=request.form.get('venue_id'),
+                artist_id=request.form.get('artist_id'),
+                start_time=request.form.get('start_time'))
 
+    db.session.add(show)
+    db.session.commit()
   # on successful db insert, flash success
-  flash('Show was successfully listed!')
+    flash('Show was successfully listed!')
+    return redirect(url_for('index'))
   # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Show could not be listed.')
+  except:
+    flash('An error occurred. Show could not be listed.')
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-  return render_template('pages/home.html')
+    return redirect(url_for('create_shows'))
+
 
 @app.errorhandler(404)
 def not_found_error(error):

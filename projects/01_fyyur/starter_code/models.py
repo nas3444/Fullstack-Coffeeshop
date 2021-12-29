@@ -1,3 +1,4 @@
+from logging import fatal
 from sqlalchemy.orm import backref
 from app import db
 
@@ -18,7 +19,7 @@ class Venue(db.Model):
     website_link = db.Column(db.String(120))
     seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(120))
-    artists = db.relationship('Artist', secondary='Show')
+    shows = db.relationship('Show', backref='Venue', lazy=True)
 
 
 class Artist(db.Model):
@@ -37,15 +38,15 @@ class Artist(db.Model):
     website_link = db.Column(db.String(120))
     seeking_venue = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(120))
-    venues = db.relationship('Venue', secondary='Show')
+    shows = db.relationship('Show', backref='Artist', lazy=True)
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 
-    class Show(db.Model):
-        __tablename__ = 'Show'
+class Show(db.Model):
+    __tablename__ = 'Show'
 
-        venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), primary_key=True)
-        artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), primary_key=True)
-        start_time = db.Column(db.DateTime)
-        venue = db.relationship('Venue', backref='venue')
-        artist = db.relationship('Artist', backref='artist')
+    id = db.Column(db.Integer, primary_key=True)
+    venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
+    artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
+    
