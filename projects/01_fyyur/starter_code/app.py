@@ -14,7 +14,6 @@ from logging import Formatter, FileHandler
 from flask_wtf import FlaskForm
 from forms import *
 from flask_migrate import Migrate
-from models import *
 
 #----------------------------------------------------------------------------#
 # App Config.
@@ -28,6 +27,7 @@ db = SQLAlchemy(app)
 # TODO: connect to a local postgresql database
 migrate = Migrate(app, db)
 
+from models import *
 #----------------------------------------------------------------------------#
 # Filters.
 #----------------------------------------------------------------------------#
@@ -62,26 +62,28 @@ def venues():
   # TODO: replace with real venues data.
   #       num_upcoming_shows should be aggregated based on number of upcoming shows per venue.
   data = []
+
+  areas = db.session.query(Venue.city, Venue.state).distinct()
   
-  areas = db.session.query(distinct(Venue.city), Venue.state).all()
   for area in areas:
-      city = area[0]
-      state = area[1]
+    venues = Venue.query.filter_by(city=area.city, state=area.state).all()
+    city = area.city
+    state = area.state
+    venue_record = []
 
-      area_data = {"city": city, "state": state, "venues": []}
+    for venue in venues:
+      num_upcoming_shows = len(venue.shows.filter(Show.start_time > datetime.now()).all())
+      venue_record.append({
+        "id" : venue.id,
+        "name" : venue.name,
+        "num_upcoming_shows" : num_upcoming_shows
+      })
 
-      venues = Venue.query.filter_by(city=city, state=state).all()
-      for venue in venues:
-        num_upcoming_shows = len(venue.shows.filter(Show.start_time > datetime.now()).all())
-        venue_data = {
-          "id" : venue.id,
-          "name" : venue.name,
-          "num_upcoming_shows" : num_upcoming_shows
-        }
-          
-        area_data["venues"].append(venue_data)
-        
-      data.append(area_data)
+    data.append({
+      "city" : city,
+      "state" : state,
+      "venues" : venue_record
+    })
 
   return render_template('pages/venues.html', areas=data)
 
