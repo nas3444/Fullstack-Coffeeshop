@@ -78,9 +78,125 @@ The `--reload` flag will detect file changes and restart the server automaticall
    - Run the collection and correct any errors.
    - Export the collection overwriting the one we've included so that we have your proper JWTs during review!
 
-### Implement The Server
+## API Endpoints
 
-There are `@TODO` comments throughout the `./backend/src`. We recommend tackling the files in order and from top to bottom:
+### GET '/drinks'
+* Returns a list of drinks in short representation
+* Request parameters: None
+* Response body:
+```
+{
+    "drinks": [
+        {
+            "id": 2,
+            "recipe": [
+                {
+                    "color": "blue",
+                    "parts": 1
+                }
+            ],
+            "title": "Water5"
+        },
+        {
+            "id": 4,
+            "recipe": [
+                {
+                    "color": "black",
+                    "parts": 1
+                }
+            ],
+            "title": "espresso"
+        }
+    ],
+    "success": true
+}
+```
 
-1. `./src/auth/auth.py`
-2. `./src/api.py`
+### GET '/drinks-detail'
+* Returns a list of drinks in long representaion
+* Request parameters: None
+* Response body:
+```
+{
+    "drinks": [
+        {
+            "id": 2,
+            "recipe": [
+                {
+                    "color": "blue",
+                    "name": "water",
+                    "parts": 1
+                }
+            ],
+            "title": "Water5"
+        },
+        {
+            "id": 4,
+            "recipe": [
+                {
+                    "color": "black",
+                    "name": "espresso",
+                    "parts": 1
+                }
+            ],
+            "title": "espresso"
+        }
+    ],
+    "success": true
+}
+```
+
+### POST '/drinks'
+* Creates a new drink in the database
+* Request parameters: a drink object containing a title and a recipe
+* Response body:
+```
+{
+    "drinks": [
+        {
+            "id": 9,
+            "recipe": {
+                "color": "blue",
+                "name": "Water",
+                "parts": 1
+            },
+            "title": "water"
+        }
+    ],
+    "success": true
+}
+```
+
+### PATCH '/drinks/<int:id>'
+* Updates the corresponding drink
+* Request parameters: a drink title or recipe or both together
+* Response body:
+```
+{
+    "drinks": [
+        {
+            "id": 2,
+            "recipe": [
+                {
+                    "color": "blue",
+                    "name": "ss",
+                    "parts": 1
+                }
+            ],
+            "title": "Water5"
+        }
+    ],
+    "success": true
+}
+```
+
+### DELETE '/drinks/<int:id>'
+* deletes the corresponding drink
+* Request parameters: drink id 
+* Response body:
+```
+{
+    "delete": 2,
+    "success": true
+}
+```
